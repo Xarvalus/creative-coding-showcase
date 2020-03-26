@@ -13,7 +13,8 @@ struct Model {
 }
 
 fn model(app: &App) -> Model {
-    let window_id = app.new_window().size(1024, 1024).view(view).build().unwrap();
+    let window_id = app.new_window().size(1024, 1024)
+        .view(view).build().unwrap();
 
     // Load the image from disk and upload it to a GPU texture.
     let assets = app.assets_path().unwrap();
@@ -29,16 +30,34 @@ fn update(_app: &App, _model: &mut Model, _update: Update) {
 // TODO: webassembly is there? https://www.figma.com/
 
 // Based on: https://github.com/nannou-org/nannou/blob/master/examples/draw/draw_textured_mesh.rs
-fn view(app: &App, model: &Model, frame: Frame){
-    frame.clear(DIMGRAY);
+fn view(app: &App, model: &Model, frame: Frame) {
+    frame.clear(DIMGRAY); // BLACK
     let window = app.window(model.window_id).unwrap();
     let win_rect = window.rect();
     let draw = app.draw();
 
-    // Generate the triangulated points for a cuboid to use for out mesh.
+    let centre = pt3(0.0, 1.0, 0.0);
+    let size = vec3(2.0, 1.0, 0.0);
+    generate_cuboid(app, model, win_rect, &draw, centre, size);
+
+    // TODO: rework to struct / method?
     let centre = pt3(0.0, 0.0, 0.0);
-    let size = vec3(1.0, 1.0, 1.0);
+    let size = vec3(1.0, 0.5, 1.0);
+    generate_cuboid(app, model, win_rect, &draw, centre, size);
+
+    let centre = pt3(0.0, -1.0, 0.0);
+    let size = vec3(2.0, 1.0, 0.0);
+    generate_cuboid(app, model, win_rect, &draw, centre, size);
+
+    // Draw to the frame!
+    draw.to_frame(app, &frame).unwrap();
+}
+
+fn generate_cuboid(app: &App, model: &Model, win_rect: Rect<f32>, draw: &Draw,
+                   centre: Point3<f32>, size: Vector3<f32>) {
+    // Generate the triangulated points for a cuboid to use for out mesh.
     let cuboid = geom::Cuboid::from_xyz_whd(centre, size);
+
     let points = cuboid
         .triangles_iter()
         .flat_map(geom::Tri::vertices)
@@ -57,7 +76,4 @@ fn view(app: &App, model: &Model, frame: Frame){
         .z_radians(app.time * 0.33)
         .x_radians(app.time * 0.166 + -app.mouse.y / 100.0)
         .y_radians(app.time * 0.25 + app.mouse.x / 100.0);
-
-    // Draw to the frame!
-    draw.to_frame(app, &frame).unwrap();
 }
