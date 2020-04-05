@@ -9,4 +9,5 @@ edition = "2018"
 [dependencies]
 # nannou = "0.13.1"
 nannou = { git = "https://github.com/nannou-org/nannou" }
+rand = "0.7.3"
 
